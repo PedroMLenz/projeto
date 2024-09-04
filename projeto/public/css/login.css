@@ -1,0 +1,164 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Quicksand', sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #ffffff;
+}
+
+section {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.125rem;
+    flex-wrap: wrap;
+    overflow: hidden;
+}
+
+section .signin {
+    border: 0.2rem solid #323232;
+    position: absolute;
+    width: 25rem;
+    background: #f1f1f1;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2.5rem;
+    border-radius: 2rem;
+    box-shadow: 0 1rem 2.25rem rgba(0, 0, 0, 0.3);
+}
+
+section .signin .content {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+section .signin .content h2 {
+    font-size: 2em;
+    color: #323232;
+    text-transform: uppercase;
+}
+
+section .signin .content .form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.625rem;
+}
+
+section .signin .content .form .inputBox {
+    position: relative;
+    width: 100%;
+}
+
+section .signin .content .form .inputBox input {
+    position: relative;
+    width: 100%;
+    background: #fff;
+    border: none;
+    outline: none;
+    padding: 1.625rem 0.625rem 0.5rem;
+    border-radius: 0.75rem;
+    color: #323232;
+    font-weight: 500;
+    font-size: 1em;
+}
+
+section .signin .content .form .inputBox i {
+    position: absolute;
+    left: 0;
+    padding: 1rem;
+    font-style: normal;
+    color: #323232;
+    transition: 0.5s;
+    pointer-events: none;
+}
+
+.signin .content .form .inputBox input:focus~i,
+.signin .content .form .inputBox input:valid~i {
+    transform: translateY(-0.5rem);
+    font-size: 0.8em;
+    color: #e63825;
+}
+
+.signin .content .form .links {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.signin .content .form .links a {
+    color: #e63825;
+    text-decoration: none;
+}
+
+.signin .content .form .links a:nth-child(2) {
+    color: #e63825;
+    font-weight: 600;
+}
+
+.signin .content .form .inputBox input[type="submit"] {
+    padding: 0.625rem;
+    background: #e63825;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1.35em;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+}
+
+input[type="submit"]:active {
+    opacity: 0.6;
+}
+
+.signin .content .form .inputBox input[type="submit"]:hover {
+    background-color: #af3427;
+}
+
+.error-message {
+    color: #e63825;
+    font-size: 0.75rem;
+    position: absolute;
+    bottom: -1.25rem;
+    left: 0;
+    width: 100%;
+    padding-top: 0.375rem;
+}
+
+@media (max-width: 48rem) {
+    section .signin {
+        width: 90%;
+        padding: 1.25rem;
+    }
+
+    section .signin .content .form .inputBox input {
+        padding: 1rem 0.75rem 0.5rem;
+        /* Reduz o padding dos inputs */
+    }
+
+    section .signin .content .form .inputBox input[type="submit"] {
+        font-size: 1.2em;
+        /* Reduz o tamanho da fonte do botão */
+    }
+
+    h2 {
+        text-align: center;
+    }
+}
