@@ -1,86 +1,117 @@
 <?php
 session_start();
 require_once '../config/conexao.php';
-require_once '../model/PartidasModel.php';
+require_once '../model/partidasModel.php';
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 $partidaModel = new Partida($pdo);
 
-try {
-    // Verifica se o usuário está logado
-    if (!isset($_SESSION['user_id'])) {
-        $_SESSION['error_message'] = 'Você precisa estar logado para realizar essa ação.';
-        header('Location: ../../login.php');
-        exit();
-    }
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $acao = $_POST['action'];
+    switch ($acao) {
+        case 'create':
+            criarPartida($pdo);
+            break;
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // Ação de criar uma nova partida
-        if ($_POST['action'] === 'create') {
-            $timeCasaId = $_POST['time_casa_id'];
-            $timeVisitanteId = $_POST['time_visitante_id'];
-            $data = $_POST['data'];
-            $hora = $_POST['hora'];
-            $local = $_POST['local'];
-            $criadorId = $_SESSION['user_id'];
-            $status = $_POST['status'];
-            $gols_casa = $_POST['gols_casa'];
-            $gols_visitante = $_POST['gols_visitante'];
+        case 'edit':
+            editarPartida($pdo);
+            break;
 
-            $partidaId = $partidaModel->criarPartida($timeCasaId, $timeVisitanteId, $data, $hora, $local, $criadorId, $status, $gols_casa, $gols_visitante);
-            $_SESSION['message'] = 'Partida criada com sucesso!';
+        case 'delete':
+            deletarPartida($pdo);
+            break;
 
-            header("Location: ../view/match/view.php?id=$partidaId");
+        case 'atualizar_posicao':
+            atualizarPosicao($pdo);
+            break;
+
+        default:
+            header('Location: ../view/match/gerenciar.php');
             exit();
-        }
-
-        // Ação de deletar uma partida
-        if ($_POST['action'] === 'delete') {
-            $partidaId = $_POST['id'];
-            $partidaModel->deletarPartida($partidaId);
-            $_SESSION['message'] = 'Partida deletada com sucesso!';
-            header("Location: ../view/match/manage.php");
-            exit();
-        }
-
-        if ($_POST['action'] === 'edit') { // Alterado de 'update' para 'edit'
-            $partidaId = $_POST['id'];
-            $timeCasaId = $_POST['time_casa_id'];
-            $timeVisitanteId = $_POST['time_visitante_id'];
-            $data = $_POST['data'];
-            $hora = $_POST['hora']; // Adicione a hora
-            $local = $_POST['local'];
-            $status = $_POST['status'];
-            $gols_casa = $_POST['gols_casa'];
-            $gols_visitante = $_POST['gols_visitante'];
-
-            $partidaModel->atualizarPartida($partidaId, $timeCasaId, $timeVisitanteId, $data, $hora, $local, $status, $gols_casa, $gols_visitante);
-            $_SESSION['message'] = 'Partida atualizada com sucesso!';
-            header("Location: ../view/match/view.php?id=$partidaId");
-            exit();
-        }
-
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'atualizar_posicao') {
-            $user_id = $_POST['user_id'];
-            $position = $_POST['position'];
-            
-            $stmt = $pdo->prepare("UPDATE times_jogadores SET position = :position WHERE user_id = :user_id");
-            $stmt->execute(['position' => $position, 'user_id' => $user_id]);
-            
-            echo "Posição salva com sucesso.";
-            
-        }
-        
     }
+}
 
-    if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id'])) {
-        $partidaId = $_GET['id'];
-        $partida = $partidaModel->buscarPartidaPorId($partidaId);
-        include '../view/match/view.php';
-        exit();
-    }
-
-} catch (Exception $e) {
-    $_SESSION['error_message'] = $e->getMessage();
-    header('Location: ../view/match/manage.php');
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id'])) {
+    $partidaId = $_GET['id'];
+    $partida = $partidaModel->buscarPartidaPorId($partidaId);
+    include '../view/match/visualizar.php';
     exit();
 }
+
+function criarPartida($pdo) {
+    global $partidaModel;
+
+    $timeCasaId = $_POST['time_casa_id'];
+    $timeVisitanteId = $_POST['time_visitante_id'];
+    $data = $_POST['data'];
+    $hora = $_POST['hora'];
+    $local = $_POST['local'];
+    $criadorId = $_SESSION['user_id'];
+    $status = $_POST['status'];
+    $golsCasa = $_POST['gols_casa'];
+    $golsVisitante = $_POST['gols_visitante'];
+
+    $partidaId = $partidaModel->criarPartida($timeCasaId, $timeVisitanteId, $data, $hora, $local, $criadorId, $status, $golsCasa, $golsVisitante);
+
+    if ($partidaId) {
+        $_SESSION['message'] = 'Partida criada com sucesso!';
+        header("Location: ../view/match/visualizar.php?id=$partidaId");
+    } else {
+        $_SESSION['error_message'] = 'Erro ao criar a partida.';
+        header('Location: ../view/match/gerenciar.php');
+    }
+    exit();
+}
+
+function editarPartida($pdo) {
+    global $partidaModel;
+
+    $partidaId = $_POST['id'];
+    $timeCasaId = $_POST['time_casa_id'];
+    $timeVisitanteId = $_POST['time_visitante_id'];
+    $data = $_POST['data'];
+    $hora = $_POST['hora'];
+    $local = $_POST['local'];
+    $status = $_POST['status'];
+    $golsCasa = $_POST['gols_casa'];
+    $golsVisitante = $_POST['gols_visitante'];
+
+    if ($partidaModel->atualizarPartida($partidaId, $timeCasaId, $timeVisitanteId, $data, $hora, $local, $status, $golsCasa, $golsVisitante)) {
+        $_SESSION['message'] = 'Partida atualizada com sucesso!';
+    } else {
+        $_SESSION['error_message'] = 'Erro ao atualizar a partida.';
+    }
+    header("Location: ../view/match/visualizar.php?id=$partidaId");
+    exit();
+}
+
+function deletarPartida($pdo) {
+    global $partidaModel;
+
+    $partidaId = $_POST['id'];
+    
+    if ($partidaModel->deletarPartida($partidaId)) {
+        $_SESSION['message'] = 'Partida deletada com sucesso!';
+    } else {
+        $_SESSION['error_message'] = 'Erro ao deletar a partida.';
+    }
+    header("Location: ../view/match/gerenciar.php");
+    exit();
+}
+
+function atualizarPosicao($pdo) {
+    $userId = $_POST['user_id'];
+    $position = $_POST['position'];
+
+    $stmt = $pdo->prepare("UPDATE times_jogadores SET position = :position WHERE user_id = :user_id");
+    if ($stmt->execute(['position' => $position, 'user_id' => $userId])) {
+        echo "Posição salva com sucesso.";
+    } else {
+        echo "Erro ao salvar a posição.";
+    }
+    exit();
+}
+

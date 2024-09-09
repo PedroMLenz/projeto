@@ -6,8 +6,8 @@
 
     <ul class="nav-links">
         <li><a href="../../../projeto/index.php">Home</a></li>
-        <li><a href="../../../projeto/view/team/manage.php">Times</a></li>
-        <li><a href="../../../projeto/view/match/manage.php">Partidas</a></li>
+        <li><a href="../../../projeto/view/team/gerenciar.php">Times</a></li>
+        <li><a href="../../../projeto/view/match/gerenciar.php">Partidas</a></li>
         <li><a href="../../../projeto/view/user/perfil.php">Perfil</a></li>
     </ul>
 </body>

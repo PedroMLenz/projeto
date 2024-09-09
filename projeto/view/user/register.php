@@ -18,8 +18,9 @@ unset($_SESSION['error_message']); // Limpa a mensagem de erro após exibição
         <div class="signin">
             <div class="content">
                 <h2>Fazer registro</h2>
-                <form action="../../controller/usuarioController.php?action=register" class="form" method="post"
+                <form action="../../controller/usuarioController.php" class="form" method="post"
                     autocomplete="off">
+                    <input type="hidden" name="action" value="register">
                     <div class="inputBox">
                         <input type="text" required name="name" id="name" oninput="validarNomeUsuario()">
                         <i>Username</i>

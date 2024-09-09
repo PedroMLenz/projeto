@@ -118,7 +118,7 @@ class Time
     }
 }
 
-    public function updatePlayerPosition($user_id, $time_id, $position)
+    public function atualizarPosicaoJogador($user_id, $time_id, $position)
     {
         // Atualiza a posição do jogador no banco de dados
         $stmt = $this->pdo->prepare("
@@ -231,4 +231,3 @@ class Time
     return false; // Usuário não encontrado
 }
 }
-?>

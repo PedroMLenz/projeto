@@ -16,8 +16,9 @@ unset($_SESSION['error_message']); // Limpa a mensagem de erro após exibição
         <div class="signin">
             <div class="content">
                 <h2>Fazer login</h2>
-                <form action="../../controller/usuarioController.php?action=login" class="form" method="post"
+                <form action="../../controller/usuarioController.php" class="form" method="post"
                     autocomplete="off">
+                    <input type="hidden" name="action" value="login">
                     <div class="inputBox">
                         <input type="email" required name="email" id="email" aria-label="Digite seu email"
                             aria-required="true"><i>Email</i>

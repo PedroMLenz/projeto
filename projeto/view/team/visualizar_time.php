@@ -26,7 +26,7 @@ $time = $timeModel->buscarTimePorId($timeId);
 // Verifica se o time existe
 if (!$time) {
     $_SESSION['error_message'] = 'Time não encontrado.';
-    header('Location: manage.php');
+    header('Location: gerenciar.php');
     exit();
 }
 
@@ -78,7 +78,7 @@ include '../layouts/header.php';
             </table>
         </section>
         <br>
-        <a href="manage.php" class="subb">Voltar</a>
+        <a href="gerenciar.php" class="subb">Voltar</a>
     </div>
 
     <!-- Inclui o rodapé -->

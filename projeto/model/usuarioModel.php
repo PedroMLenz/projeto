@@ -1,15 +1,16 @@
 <?php
 
 class Usuario {
-    private $db;
+    private $pdo;
     private $id;
     private $nome;
     private $email;
     private $senha;
+    private $imagem;
 
     // Construtor que espera uma instância de PDO
-    public function __construct($db) {
-        $this->db = $db;
+    public function __construct($pdo) {
+        $this->pdo = $pdo;
     }
 
     // Métodos para definir as propriedades
@@ -29,6 +30,10 @@ class Usuario {
         $this->senha = $senha;
     }
 
+    public function setImagem($imagem) {
+        $this->imagem = $imagem;
+    }
+
     // Métodos para acessar as propriedades
     public function getId() {
         return $this->id;
@@ -46,87 +51,70 @@ class Usuario {
         return $this->senha;
     }
 
-    // Método para criar um novo usuário
-    public function criar() {
-        $sql = "INSERT INTO usuarios (nome, email, senha) VALUES (:nome, :email, :senha)";
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':nome', $this->nome);
-        $stmt->bindParam(':email', $this->email);
-        $stmt->bindParam(':senha', $this->senha);
-        return $stmt->execute();
+    public function getImagem() {
+        return $this->imagem;
     }
 
     // Método para registrar um novo usuário
-    public function register($nome, $email, $senha) {
+    public function registrar($nome, $email, $senha) {
         // Verifica se o email já está cadastrado
-        $stmt = $this->db->prepare("SELECT * FROM usuarios WHERE email = :email");
+        $stmt = $this->pdo->prepare("SELECT * FROM usuarios WHERE email = :email");
         $stmt->execute(['email' => $email]);
         if ($stmt->rowCount() > 0) {
             return false; // Email já cadastrado
         }
 
-        // Cria um hash da senha
-        $hashSenha = password_hash($senha, PASSWORD_DEFAULT);
-
         // Insere o novo usuário no banco de dados
-        $stmt = $this->db->prepare("INSERT INTO usuarios (nome, email, senha) VALUES (:nome, :email, :senha)");
-        return $stmt->execute(['nome' => $nome, 'email' => $email, 'senha' => $hashSenha]);
+        $stmt = $this->pdo->prepare("INSERT INTO usuarios (nome, email, senha) VALUES (:nome, :email, :senha)");
+        return $stmt->execute(['nome' => $nome, 'email' => $email, 'senha' => $senha]);
     }
 
     // Método para fazer login de um usuário
     public function login($email, $senha) {
-        // Verifica as credenciais do usuário
-        $stmt = $this->db->prepare("SELECT * FROM usuarios WHERE email = :email");
+        // Previne SQL Injection
+        $stmt = $this->pdo->prepare("SELECT * FROM usuarios WHERE email = :email");
         $stmt->execute(['email' => $email]);
         $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($usuario && password_verify($senha, $usuario['senha'])) {
+    
+        if ($usuario && $usuario['senha'] === $senha) {
             return $usuario;
         }
         return false;
     }
-
-    // Método para buscar um usuário por ID
-    public function buscarPorId() {
-        $sql = "SELECT * FROM usuarios WHERE id = :id";
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':id', $this->id);
-        $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-    // Método para listar todos os usuários
-    public function listarTodos() {
-        $sql = "SELECT * FROM usuarios";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    // Método para atualizar as informações de um usuário
-    public function atualizar() {
-        $sql = "UPDATE usuarios SET nome = :nome, email = :email, senha = :senha WHERE id = :id";
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':id', $this->id);
-        $stmt->bindParam(':nome', $this->nome);
-        $stmt->bindParam(':email', $this->email);
-        $stmt->bindParam(':senha', $this->senha);
-        return $stmt->execute();
-    }
-
-    // Método para excluir um usuário
-    public function excluir() {
-        $sql = "DELETE FROM usuarios WHERE id = :id";
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':id', $this->id);
-        return $stmt->execute();
-    }
+    
 
     public function buscarUsuarioPorId($userId) {
-        $sql = 'SELECT nome, email FROM usuarios WHERE id = :id';
-        $stmt = $this->db->prepare($sql);
+        $sql = 'SELECT nome, email, imagem FROM usuarios WHERE id = :id';
+        $stmt = $this->pdo->prepare($sql);
         $stmt->bindParam(':id', $userId, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    // Método para atualizar as informações do usuário
+    public function atualizarUsuario($id, $nome, $email, $senha = null) {
+        $sql = "UPDATE usuarios SET nome = :nome, email = :email" .
+                ($senha ? ", senha = :senha" : "") .
+                " WHERE id = :id";
+    
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindParam(':id', $id);
+        $stmt->bindParam(':nome', $nome);
+        $stmt->bindParam(':email', $email);
+    
+        return $stmt->execute();
+    }
+
+    public function atualizarImagem($id, $imagem) {
+        // Aqui salvamos apenas o nome do arquivo no banco de dados
+        $nomeImagem = basename($imagem); // basename() retorna apenas o nome do arquivo
+        
+        $sql = "UPDATE usuarios SET imagem = :imagem WHERE id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindParam(':imagem', $nomeImagem); // Salva apenas o nome do arquivo
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        
+        return $stmt->execute();
+    }
+    
 }

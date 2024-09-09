@@ -44,9 +44,17 @@ include '../layouts/header.php';
 
 <body>
     <div class="container-perfil">
-
+<!-- Mensagens de feedback -->
+        <?php if (isset($_SESSION['message'])): ?>
+            <div class="message success"><?php echo htmlspecialchars($_SESSION['message']); ?></div>
+            <?php unset($_SESSION['message']); ?>
+            <?php elseif (isset($_SESSION['error_message'])): ?>
+            <div class="message error"><?php echo htmlspecialchars($_SESSION['error_message']); ?></div>
+            <?php unset($_SESSION['error_message']); ?>
+            <?php endif; ?>
+            
         <div class="profile-picture">
-            <img src="../../public/img/user.jpg" alt="Ícone do Usuário">
+            <img src="../../public/uploads/<?php echo $usuario['imagem'];?>"/></p>
         </div>
         <h1>@<?php echo htmlspecialchars($usuario['nome']); ?></h1>
         <h2>Informações Pessoais</h2>
@@ -74,7 +82,9 @@ include '../layouts/header.php';
         <?php else: ?>
         <p>Você não está participando como jogador em nenhum time.</p>
         <?php endif; ?>
-        <a href="../team/manage.php" class="subb">Voltar</a><br>
+        <a href="../user/alterar_imagem.php" class="subb">Alterar foto de Perfil</a><br>
+        <a href="../user/editar.php" class="subb">Editar Perfil</a><br>
+        <a href="../team/gerenciar.php" class="subb">Voltar</a><br>
         <a href="logout.php" class="subb">Logout</a>
     </div>
 </body>

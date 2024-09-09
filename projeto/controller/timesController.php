@@ -1,7 +1,6 @@
 <?php
-session_start(); // Garanta que a sessão seja iniciada
+session_start();
 
-// Inclua o arquivo de configuração e o modelo
 require_once '../config/conexao.php';
 require_once '../model/timesModel.php';
 
@@ -10,7 +9,6 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 
-// Verifica a ação e executa o método correspondente
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = $_POST['action'];
     switch ($acao) {
@@ -27,15 +25,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             break;
 
         case 'add_member':
-            addMember($pdo);
+            adicionarMembro($pdo);
         break;
 
         case 'remove_member':
-            removeMember($pdo);
+            removerMembro($pdo);
         break;  
 
         case 'position':
-            savePlayerPosition($pdo);
+            salvarPosicao($pdo);
         break;
 
         default:
@@ -47,7 +45,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 /**
  * Função para lidar com a criação de um novo time.
  */
-
 function criarTime($pdo)
 {
     $id = $_POST['id'];
@@ -59,7 +56,7 @@ function criarTime($pdo)
     if ($timeModel->verificarNomeExistente($nome)) {
         $_SESSION['error_message'] = 'Nome do time já está em uso.';
 
-        header('Location: ../view/team/create_edit.php?>');
+        header('Location: ../view/team/criar_editar.php?>');
 exit();
 }
 $id = $timeModel->criarTime($nome, $capitaoId);
@@ -70,14 +67,13 @@ $_SESSION['message'] = 'Time criado com sucesso!';
 $_SESSION['error_message'] = 'Erro ao criar o time.';
 }
 
-header('Location: ../view/team/manage.php');
+header('Location: ../view/team/gerenciar.php');
 exit();
 }
 
 /**
 * Função para lidar com a edição de um time existente.
 */
-
 function editarTime($pdo)
 {
 $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
@@ -87,7 +83,7 @@ $timeModel = new Time($pdo);
 // Verifica se o nome já está em uso, excluindo o próprio time em edição
 if ($timeModel->verificarNomeExistente($nome, $id)) {
 $_SESSION['error_message'] = 'Nome do time já está em uso.';
-header('Location: ../view/team/create_edit.php?id=' . $id);
+header('Location: ../view/team/criar_editar.php?id=' . $id);
 exit();
 }
 
@@ -95,24 +91,22 @@ $result = $timeModel->atualizarTime($id, $nome);
 
 if ($result) {
 $_SESSION['message'] = 'Time atualizado com sucesso!';
-header('Location: ../view/team/manage.php');
+header('Location: ../view/team/gerenciar.php');
 } else {
 $_SESSION['error_message'] = 'Erro ao atualizar o time.';
-header('Location: ../view/team/create_edit.php?id=' . $id);
+header('Location: ../view/team/criar_editar.php?id=' . $id);
 }
 exit();
 }
 
-
 /**
 * Função para lidar com a exclusão de um time.
 */
-
 function deleteTime($pdo) {
 // Verifica se o ID do time foi fornecido
 if (!isset($_POST['id'])) {
 $_SESSION['error_message'] = 'ID do time não fornecido.';
-header('Location: ../view/team/manage.php');
+header('Location: ../view/team/gerenciar.php');
 exit();
 }
 
@@ -129,7 +123,7 @@ $time = $timeModel->buscarTimePorId($timeId);
 if (!$time) {
 $_SESSION['error_message'] = 'Time não encontrado.';
 error_log("Time não encontrado para ID: " . $timeId);
-header('Location: ../view/team/manage.php');
+header('Location: ../view/team/gerenciar.php');
 exit();
 }
 
@@ -142,11 +136,14 @@ $_SESSION['error_message'] = 'Erro ao excluir o time.';
 error_log("Erro ao excluir o time para ID: " . $timeId);
 }
 
-header('Location: ../view/team/manage.php');
+header('Location: ../view/team/gerenciar.php');
 exit();
 }
 
-function savePlayerPosition($pdo)
+/**
+* Função para para salvar posição de jogador.
+*/
+function salvarPosicao($pdo)
 {
 $time_id = $_POST['time_id'];
 
@@ -158,16 +155,19 @@ $timeModel = new Time($pdo);
 
 // Atualiza a posição para cada jogador
 foreach ($positions as $user_id => $position) {
-$timeModel->updatePlayerPosition($user_id, $time_id, $position);
+$timeModel->atualizarPosicaoJogador($user_id, $time_id, $position);
 }
 }
 
 // Redireciona para a página original
-header('Location: ../view/team/manage_members.php?id=' . $time_id);
+header('Location: ../view/team/gerenciar_membros.php?id=' . $time_id);
 exit(); // Sempre use exit após header para garantir que o script seja encerrado
 }
 
-function addMember($pdo){
+/**
+* Função para para aidionar novo jogador.
+*/
+function adicionarMembro($pdo){
 
 $timeId = intval($_POST['time_id']);
 $nome = trim($_POST['add_user_name']);
@@ -179,16 +179,19 @@ $_SESSION['message'] = 'Membro adicionado com sucesso!';
 } else {
 $_SESSION['error_message'] = 'Erro ao adicionar o membro ou membro já existente.';
 }
-header("Location: ../view/team/manage_members.php?id=$timeId");
+header("Location: ../view/team/gerenciar_membros.php?id=$timeId");
 exit();
 
 }
 
-function removeMember($pdo) {
+/**
+* Função para para remover jogador.
+*/
+function removerMembro($pdo) {
 if (!isset($_POST['time_id']) || !isset($_POST['remove_user_id'])) {
 error_log("Dados necessários não foram enviados: " . print_r($_POST, true));
 $_SESSION['error_message'] = 'Dados necessários não foram enviados.';
-header('Location: ../view/team/manage_members.php');
+header('Location: ../view/team/gerenciar_membros.php');
 exit();
 }
 
@@ -203,11 +206,6 @@ $_SESSION['message'] = 'Membro removido com sucesso!';
 $_SESSION['error_message'] = 'Não é possível remover o capitão ou erro ao remover o membro.';
 }
 
-header('Location: ../view/team/manage_members.php?id=' . $timeId);
+header('Location: ../view/team/gerenciar_membros.php?id=' . $timeId);
 exit();
 }
-
-
-
-
-?>

@@ -108,4 +108,13 @@ class Partida {
             throw new Exception("Erro ao deletar a partida.");
         }
     }
+
+    public function atualizarImagem($id, $imagem) {
+        $sql = "UPDATE usuarios SET imagem = :imagem WHERE id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindParam(':id', $id);
+        $stmt->bindParam(':imagem', $imagem);
+        return $stmt->execute();
+    }
+    
 }
